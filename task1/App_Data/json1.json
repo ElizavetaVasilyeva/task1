@@ -1,0 +1,7 @@
+﻿{
+    "name": "Ivan",
+    "surname": "Ivanov",
+    "age": 19,
+    "adress": {"country": "Belarus","city": "Minsk","streetAddress":"Lenin street, 15/20"},
+    "extrainfo": {"phone": null,"birthday": {"day": 27,"mounth": "january"}}
+}

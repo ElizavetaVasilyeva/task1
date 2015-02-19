@@ -1,0 +1,331 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>HomePage</title>
+    <link rel="stylesheet" real="stylesheet" href="/Context/Css/bootstrap.css" type="text/css" />
+    <!--<link rel="stylesheet" real="stylesheet" href="/Scripts/css/bootstrap.css.map" type="text/css" />-->
+    <link rel="stylesheet" real="stylesheet" href="/Context/Css/style.css" type="text/css" />
+    <script src="/Context/Js/jquery.min.js"></script>
+    <script src="/Context/Js/bootstrap.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <div class="container" id="container">
+        <nav class="navbar navbar-inverse" role="navigation">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Brand</a>
+                </div>
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav">
+                            <li><a href=#>Menu1</a></li>
+                            <li><a href=#>Menu2</a></li>
+                            <li><a href=#>Menu3</a></li>
+                        </ul>
+                        <div class="navbar-btn navbar-right">
+
+                            <p class="right">
+                                <a class="right" id="nameuser"></a>
+                                <input type="button" class="btn right btn-sm" data-toggle="modal" id="btnlogin" data-target="#login" value="Sign In" style=" display:block;" />
+                                <input type="button" class="btn right btn-sm" id="btnlogoff" value="Log Off" onclick="LogOff()" style=" display:none;" />
+                            </p>
+                        </div>
+                    </div>
+            </div>
+        </nav>
+
+        <div id="loaddata" style="display:none;">
+            <h1><a id="infoData" onclick="OpenData1('data')">Load data (version 1)!</a></h1>
+            <h1><a id="infoData" onclick="OpenData2('data')">Load data (version 2)!</a></h1>
+            <ul id="data">no items</ul>
+        </div>
+    </div>
+
+    <div class="modal fade" id="login" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Welcome!</h4>
+                </div>
+                <div class="modal-body">
+                    <p><input type="email" class="form-control" name="email" id="email1" placeholder="Enter Email" value=""></p>
+                    <p><input type="password" class="form-control" id="password1" name="password" placeholder="Enter Password"></p>
+                    <p>
+                        <input type="button" class="btn btn-info" id="btnlog" value="Sign in" onclick="SendLoginData()" />
+                        <button class="btn btn-default" data-toggle="modal" id="btn-register" data-target="#register">Registration</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="register" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Registration</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="registerForm" action='#' method="post">
+                        <p><input type="email" class="form-control" name="email" id="email" placeholder="Enter Email" value=""></p>
+                        <p><input type="password" class="form-control" id="password" name="password" placeholder="Enter Password"></p>
+                        <p><input type="button" id="regist" class="btn btn-info" value="Register" onclick="SendRegisterData()" />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+        //$('#btn-register').click(function () {
+        //    $('#login').modal('hide');
+        //});
+
+        //$(document).ready(function () {
+        //    $('#btnlog').on('click', function ()
+        //$('#btnlog').click(function () {
+        function SendLoginData() {
+            var username = document.getElementById("email1").value;
+            var pwd = document.getElementById("password1").value;
+            //var data = new FormData();
+            //data.append('username', username);
+            //data.append('pwd', pwd);
+            var data = 'email=' + encodeURIComponent(username) +
+                '&pwd=' + encodeURIComponent(pwd);
+            var xhr = new XMLHttpRequest();
+            var url = '/BusinessLogic/LoginHandler.ashx';
+            xhr.open("POST", url, false);
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    if (xhr.responseText == "success") {
+                        $('#login').modal('hide');
+                        //document.getElementById("btnlogin").value = 'Log off';
+                        document.getElementById("btnlogin").style.display = 'none';
+                        document.getElementById("btnlogoff").style.display = 'block';
+                        document.getElementById("nameuser").innerHTML = username;
+                        document.getElementById("loaddata").style.display = 'block';
+                    }
+                    else {
+                        alert("Incorrect email or password!");
+                    }
+                }
+            }
+            xhr.send(data);
+        };
+
+       window.onload=function()
+        {
+        var xhr = new XMLHttpRequest();
+        var url = '/BusinessLogic/CheckCookies.ashx';
+        xhr.open("POST", url, false);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                if (xhr.responseText != "empty") {
+                    document.getElementById("btnlogin").style.display = 'none';
+                    document.getElementById("btnlogoff").style.display = 'block';
+                    document.getElementById("nameuser").innerHTML = xhr.responseText;
+                    document.getElementById("loaddata").style.display = 'block';
+                }
+            }
+        }
+        xhr.send(null);
+        }
+
+        //function CheckCookies(){
+        //    var xhr = new XMLHttpRequest();
+        //    var url = 'CheckCookies.ashx';
+        //    xhr.open("POST",url,false);
+        //    xhr.onreadystatechange = function () {
+        //        if (xhr.readyState == 4 && xhr.status == 200) {
+        //            document.getElementById("btnlogin").style.display = 'none';
+        //            document.getElementById("btnlogoff").style.display = 'block';
+        //            document.getElementById("nameuser").innerHTML = xhr.responseText;
+        //            document.getElementById("loaddata").style.display = 'block';
+        //        }
+        //    }
+        //    xhr.send(null);
+        //}
+
+        function LogOff() {
+            var xhr = new XMLHttpRequest();
+            var url = '/BusinessLogic/LogOff.ashx';
+            xhr.open("POST", url, false);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    if (xhr.responseText == "success") {
+                        document.getElementById("btnlogin").style.display = 'block';
+                        document.getElementById("btnlogoff").style.display = 'none';
+                        document.getElementById("nameuser").innerHTML = "";
+                        document.getElementById("loaddata").style.display = 'none';
+                        alert("Nice!");
+                    }
+                }
+            }
+            xhr.send(null);
+        };
+
+        //var strUserName = $('#email1').val();
+        //var strPassword = $('#password1').val();
+        //$.ajax({
+        //    url: "LoginHandler.ashx",
+        //    type: "post",
+        //    data: {
+        //        email: strUserName,
+        //        password: strPassword
+        //    },
+        //    success: function (result) {
+        //        if (result == "success") {
+        //            $('#login').modal('hide');
+        //            $('#btnlogin').text('Log Off');
+        //            $('#nameuser').val(strUserName);
+        //        }
+        //    }
+        //})
+
+        function SendRegisterData() {
+            var username = document.getElementById("email").value;
+            var pwd = document.getElementById("password").value;
+            //var data = new FormData();
+            //data.append('username', username);
+            //data.append('pwd', pwd);
+            var data = 'email=' + encodeURIComponent(username) +
+                '&pwd=' + encodeURIComponent(pwd);
+            var xhr = new XMLHttpRequest();
+            var url = '/BusinessLogic/RegisterHandler.ashx';
+            xhr.open("POST", url, false);
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    if (xhr.responseText == "success") {
+                        $('#register').modal('hide');
+                        alert("You successful register on sait!");
+                    }
+                    else {
+                        alert("Try again!");
+                    }
+                }
+            }
+            xhr.send(data);
+        };
+
+        function OpenData1(id) {
+            var x = document.getElementById(id);
+            //var htm = createHtml(10);
+            var xhr = new XMLHttpRequest();
+            var url = '/BusinessLogic/JsonHandler.ashx';
+            xhr.open("GET", url, false);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    x.innerHTML = xhr.responseText;
+                }
+                else {
+                    alert("Try again!");
+                }
+            }
+            xhr.send(null);
+        };
+
+        function OpenData2(id) {
+            var x = document.getElementById(id);
+            //var htm = createHtml(10);
+            var xhr = new XMLHttpRequest();
+            var url = '/BusinessLogic/JsonAsyncHandler.axd';
+            xhr.open("GET", url, false);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var json=JSON.parse(xhr.responseText);
+                    x.innerHTML = JsonTree(json);
+                }
+                else {
+                    alert("Try again!");
+                }
+            }
+            xhr.send(null);
+        };
+
+        function JsonTree(object){
+            var json="<ul>";
+            for(prop in object){
+                var value = object[prop];
+                switch (typeof(value)){
+                    case "object":
+                        if (value == null) { json += "<li>" + prop + ": empty </li>"; break; }
+                        var token = Math.random().toString().substr(2);
+                        json += "<li style='list-style-type:circle;'><a href='#" + token + "' data-toggle='collapse'>" + prop + "</a><div id='" + token + "' class='collapse'>" + JsonTree(value) + "</div></li>";
+                        break;
+                    default:
+                        json += "<li>" + prop + ":" + value + "</li>";
+                      
+                }
+            }
+            return json + "</ul>";
+        };
+        //function ParseJson(obj)
+        //{
+        //    var x = document.getElementById("data");
+        //    if (typeof obj == "object") {
+        //        for (var key in obj) {
+        //            x.innerHTML += key+" ";
+        //            ParseJson(obj[key]);
+        //        }
+        //    } else {
+        //        x.innerHTML += obj + " ";
+        //    }
+            //if (obj instanceof Array) {
+            //    for (var i = 0; i < obj.length; i++) {
+            //        if (typeof obj[i] == "object" && obj[i]) {
+            //            ParseJson(obj[i]);
+            //        } else {
+            //            x.innerHTML += i +" "+ obj[i]+" ";
+            //        }
+            //    }
+            //} else {
+            //    for (var prop in obj) {
+            //        if (typeof obj[prop] == "object" && obj[prop]) {
+            //            ParseJson(obj[prop]);
+            //        } else {
+            //            x.innerHTML+=prop+" "+obj[prop]+" ";
+            //        }
+            //    }
+            //}
+      
+        //function createHtml(j)
+        //{
+        //    var items = [];
+        //    var templateitm = "<li>" + "option" + "</li>";
+        //    for(i=0; i<j; i++)
+        //    {
+        //        items.push(templateitm);
+        //    }
+        //    return items.join('');
+        //}
+        //$('#regist').submit(function () {
+        //    var strUserName = $("#email").val();
+        //    var strPassword = $("#password").val();
+        //    $.ajax({
+        //        url: "/RegisterHandler.ashx",
+        //        type: "post",
+        //        data: {
+        //            email: strUserName,
+        //            password: strPassword
+        //        },
+        //        success: function (result) {
+        //            if (result == "success") {
+        //                $("#btnlogin").val("Log Off");
+        //            }
+        //        }
+        //    })
+        //});
+    </script>
+
+</body>
+</html>
