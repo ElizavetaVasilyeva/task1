@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Web;
@@ -35,22 +36,22 @@ namespace task1
     }
     class AsynchOperation : IAsyncResult
     {
-        private bool _completed;
-        private Object _state;
-        private AsyncCallback _callback;
-        private HttpContext _context;
+        private bool completed;
+        private Object state;
+        private AsyncCallback callback;
+        private HttpContext context;
 
-        bool IAsyncResult.IsCompleted { get { return _completed; } }
+        bool IAsyncResult.IsCompleted { get { return completed; } }
         WaitHandle IAsyncResult.AsyncWaitHandle { get { return null; } }
-        Object IAsyncResult.AsyncState { get { return _state; } }
+        Object IAsyncResult.AsyncState { get { return state; } }
         bool IAsyncResult.CompletedSynchronously { get { return false; } }
 
         public AsynchOperation(AsyncCallback callback, HttpContext context, Object state)
         {
-            _callback = callback;
-            _context = context;
-            _state = state;
-            _completed = false;
+            this.callback = callback;
+            this.context = context;
+            this.state = state;
+            this.completed = false;
         }
 
         public void StartAsyncWork()
@@ -60,10 +61,17 @@ namespace task1
 
         private void StartAsyncTask(Object workItemState)
         {
-            _context.Response.ContentType = "application/json";
-            _context.Response.WriteFile("~/App_Data/json1.json");
-            _completed = true;
-            _callback(this);
+            context.Response.ContentType = "application/json";
+            try
+            {
+                context.Response.WriteFile("~/App_Data/json1.json");
+            }
+            catch(IOException)
+            {
+                context.Response.StatusCode = 400;
+            }
+            completed = true;
+            callback(this);
         }
     }
 }

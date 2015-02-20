@@ -16,7 +16,7 @@ namespace task1
             if (currentName != null) context.Response.Write(currentName.Identity.Name);
             else
             {
-                context.Response.Write("empty");
+                context.Response.Write("no cookies");
             }  
         }
 

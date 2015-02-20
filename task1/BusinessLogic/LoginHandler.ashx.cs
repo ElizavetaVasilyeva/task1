@@ -17,38 +17,31 @@ namespace task1
 
         public void ProcessRequest(HttpContext context)
         {
-            var user = context.Request.Params["email"].ToString();
-            var pwd = context.Request.Params["pwd"].ToString();
-
-            using (var db = new EntityModel())
+            try
             {
-                var query = (from us in db.Users
-                             where us.Email.Equals(user)
-                             select new { password = us.Password }).SingleOrDefault();
-                if (query != null && Crypto.VerifyHashedPassword(query.password, pwd))
-                {
-                    //context.User = new GenericPrincipal(new GenericIdentity(user), new string[0]);
-                   //var principal=new GenericPrincipal(new GenericIdentity(user),null);
-                   //Thread.CurrentPrincipal = principal;
-                   //if (HttpContext.Current != null)
-                   //{
-                   //    HttpContext.Current.User = principal;
-                   //}
-                    //FormsAuthentication.SetAuthCookie(user, false);
-                    MyAuthentication.AuthenticateUser(user, null);
+                var user = context.Request.Params["email"].ToString();
+                var pwd = context.Request.Params["pwd"].ToString();
 
-                    //HttpContext.Current.Response.Redirect(MyAuthentication.RedirectUrl);
-                    context.Response.Write("success");
-                    //context.Response.Redirect("~/HomePage.html");
-                }
-                else
+                using (var db = new EntityModel())
                 {
-                    context.Response.Write("fail");
+                    var query = (from us in db.Users
+                                 where us.Email.Equals(user)
+                                 select new { password = us.Password }).SingleOrDefault();
+                    if (query != null && Crypto.VerifyHashedPassword(query.password, pwd))
+                    {
+                        MyAuthentication.AuthenticateUser(user, null);
+                        context.Response.Write("success");
+                    }
+                    else
+                    {
+                        context.Response.Write("fail");
+                    }
                 }
             }
-            //MyAuthentication.AuthenticateUser(user, null);
-
-            //HttpContext.Current.Response.Redirect(MyAuthentication.RedirectUrl);
+            catch (NullReferenceException)
+            {
+                context.Response.StatusCode = 400;
+            }
         }
 
         public bool IsReusable

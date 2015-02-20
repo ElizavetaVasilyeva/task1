@@ -3,7 +3,6 @@
 <head>
     <title>HomePage</title>
     <link rel="stylesheet" real="stylesheet" href="/Context/Css/bootstrap.css" type="text/css" />
-    <!--<link rel="stylesheet" real="stylesheet" href="/Scripts/css/bootstrap.css.map" type="text/css" />-->
     <link rel="stylesheet" real="stylesheet" href="/Context/Css/style.css" type="text/css" />
     <script src="/Context/Js/jquery.min.js"></script>
     <script src="/Context/Js/bootstrap.js" type="text/javascript"></script>
@@ -22,27 +21,24 @@
                     </button>
                     <a class="navbar-brand" href="#">Brand</a>
                 </div>
-                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                        <ul class="nav navbar-nav">
-                            <li><a href=#>Menu1</a></li>
-                            <li><a href=#>Menu2</a></li>
-                            <li><a href=#>Menu3</a></li>
-                        </ul>
-                        <div class="navbar-btn navbar-right">
-
-                            <p class="right">
-                                <a class="right" id="nameuser"></a>
-                                <input type="button" class="btn right btn-sm" data-toggle="modal" id="btnlogin" data-target="#login" value="Sign In" style=" display:block;" />
-                                <input type="button" class="btn right btn-sm" id="btnlogoff" value="Log Off" onclick="LogOff()" style=" display:none;" />
-                            </p>
-                        </div>
-                    </div>
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li><a href=#>Menu1</a></li>
+                        <li><a href=#>Menu2</a></li>
+                        <li><a href=#>Menu3</a></li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a id="nameuser"></a></li>
+                        <li><a href="#" data-toggle="modal" id="btnlogin" data-target="#login" style=" display:block;">Sign in</a></li>
+                        <li><a href="#" id="btnlogoff" onclick="epamLab.LogOff()" style=" display:none;">Log Off</a></li>
+                    </ul>
+                </div>
             </div>
         </nav>
 
         <div id="loaddata" style="display:none;">
-            <h1><a id="infoData" onclick="OpenData1('data')">Load data (version 1)!</a></h1>
-            <h1><a id="infoData" onclick="OpenData2('data')">Load data (version 2)!</a></h1>
+            <h1><a id="infoData" onclick="epamLab.OpenData1('data')">Load data (version 1)!</a></h1>
+            <h1><a id="infoData" onclick="epamLab.OpenData2('data')">Load data (version 2)!</a></h1>
             <ul id="data">no items</ul>
         </div>
     </div>
@@ -52,13 +48,14 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="myModalLabel">Welcome!</h4>
+                    <h4 class="modal-title" id="myModalLabel">Welcome!</h4>  
                 </div>
                 <div class="modal-body">
+                    <div class="alert-danger"><p id="error-message"></p></div>
                     <p><input type="email" class="form-control" name="email" id="email1" placeholder="Enter Email" value=""></p>
                     <p><input type="password" class="form-control" id="password1" name="password" placeholder="Enter Password"></p>
                     <p>
-                        <input type="button" class="btn btn-info" id="btnlog" value="Sign in" onclick="SendLoginData()" />
+                        <input type="button" class="btn btn-info" id="btnlog" value="Sign in" onclick="epamLab.SendLoginData()" />
                         <button class="btn btn-default" data-toggle="modal" id="btn-register" data-target="#register">Registration</button>
                 </div>
             </div>
@@ -74,9 +71,10 @@
                 </div>
                 <div class="modal-body">
                     <form id="registerForm" action='#' method="post">
+                        <div class="alert-info"><p id="info-message"></p></div>
                         <p><input type="email" class="form-control" name="email" id="email" placeholder="Enter Email" value=""></p>
                         <p><input type="password" class="form-control" id="password" name="password" placeholder="Enter Password"></p>
-                        <p><input type="button" id="regist" class="btn btn-info" value="Register" onclick="SendRegisterData()" />
+                        <p><input type="button" id="regist" class="btn btn-info" value="Register" onclick="epamLab.SendRegisterData()" />
                     </form>
                 </div>
             </div>
@@ -85,19 +83,32 @@
 
     <script type="text/javascript">
 
-        //$('#btn-register').click(function () {
-        //    $('#login').modal('hide');
-        //});
+        var epamLab = epamLab || {};
 
-        //$(document).ready(function () {
-        //    $('#btnlog').on('click', function ()
-        //$('#btnlog').click(function () {
-        function SendLoginData() {
+        window.onload = function () {
+            var xhr = new XMLHttpRequest();
+            var url = '/BusinessLogic/CheckCookies.ashx';
+            xhr.open("POST", url, false);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    if (xhr.responseText != "no cookies") {
+                        epamLab.ChangeStateElement('none','block','block',xhr.responseText);
+                    }
+                }
+            }
+            xhr.send(null);
+        }
+
+        epamLab.ChangeStateElement=function(state1,state2,state3,text) {
+            document.getElementById("btnlogin").style.display = state1;
+            document.getElementById("btnlogoff").style.display = state2;
+            document.getElementById("nameuser").innerHTML = text;
+            document.getElementById("loaddata").style.display = state3;
+        }
+        
+        epamLab.SendLoginData = function () { 
             var username = document.getElementById("email1").value;
             var pwd = document.getElementById("password1").value;
-            //var data = new FormData();
-            //data.append('username', username);
-            //data.append('pwd', pwd);
             var data = 'email=' + encodeURIComponent(username) +
                 '&pwd=' + encodeURIComponent(pwd);
             var xhr = new XMLHttpRequest();
@@ -108,95 +119,36 @@
                 if (xhr.readyState == 4 && xhr.status == 200) {
                     if (xhr.responseText == "success") {
                         $('#login').modal('hide');
-                        //document.getElementById("btnlogin").value = 'Log off';
-                        document.getElementById("btnlogin").style.display = 'none';
-                        document.getElementById("btnlogoff").style.display = 'block';
-                        document.getElementById("nameuser").innerHTML = username;
-                        document.getElementById("loaddata").style.display = 'block';
+                        epamLab.ChangeStateElement('none', 'block', 'block', username);
                     }
                     else {
-                        alert("Incorrect email or password!");
+                        document.getElementById("error-message").innerHTML = "Incorrect email or password!";
                     }
                 }
             }
             xhr.send(data);
         };
 
-       window.onload=function()
-        {
-        var xhr = new XMLHttpRequest();
-        var url = '/BusinessLogic/CheckCookies.ashx';
-        xhr.open("POST", url, false);
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                if (xhr.responseText != "empty") {
-                    document.getElementById("btnlogin").style.display = 'none';
-                    document.getElementById("btnlogoff").style.display = 'block';
-                    document.getElementById("nameuser").innerHTML = xhr.responseText;
-                    document.getElementById("loaddata").style.display = 'block';
-                }
-            }
-        }
-        xhr.send(null);
-        }
-
-        //function CheckCookies(){
-        //    var xhr = new XMLHttpRequest();
-        //    var url = 'CheckCookies.ashx';
-        //    xhr.open("POST",url,false);
-        //    xhr.onreadystatechange = function () {
-        //        if (xhr.readyState == 4 && xhr.status == 200) {
-        //            document.getElementById("btnlogin").style.display = 'none';
-        //            document.getElementById("btnlogoff").style.display = 'block';
-        //            document.getElementById("nameuser").innerHTML = xhr.responseText;
-        //            document.getElementById("loaddata").style.display = 'block';
-        //        }
-        //    }
-        //    xhr.send(null);
-        //}
-
-        function LogOff() {
+        epamLab.LogOff=function() {
             var xhr = new XMLHttpRequest();
             var url = '/BusinessLogic/LogOff.ashx';
             xhr.open("POST", url, false);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4 && xhr.status == 200) {
                     if (xhr.responseText == "success") {
-                        document.getElementById("btnlogin").style.display = 'block';
-                        document.getElementById("btnlogoff").style.display = 'none';
-                        document.getElementById("nameuser").innerHTML = "";
-                        document.getElementById("loaddata").style.display = 'none';
-                        alert("Nice!");
+                        epamLab.ChangeStateElement('block', 'none', 'none', "");
                     }
+                }
+                else {
+                    alert("Server error! Try again!");
                 }
             }
             xhr.send(null);
         };
 
-        //var strUserName = $('#email1').val();
-        //var strPassword = $('#password1').val();
-        //$.ajax({
-        //    url: "LoginHandler.ashx",
-        //    type: "post",
-        //    data: {
-        //        email: strUserName,
-        //        password: strPassword
-        //    },
-        //    success: function (result) {
-        //        if (result == "success") {
-        //            $('#login').modal('hide');
-        //            $('#btnlogin').text('Log Off');
-        //            $('#nameuser').val(strUserName);
-        //        }
-        //    }
-        //})
-
-        function SendRegisterData() {
+        epamLab.SendRegisterData=function() {
             var username = document.getElementById("email").value;
             var pwd = document.getElementById("password").value;
-            //var data = new FormData();
-            //data.append('username', username);
-            //data.append('pwd', pwd);
             var data = 'email=' + encodeURIComponent(username) +
                 '&pwd=' + encodeURIComponent(pwd);
             var xhr = new XMLHttpRequest();
@@ -206,20 +158,18 @@
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4 && xhr.status == 200) {
                     if (xhr.responseText == "success") {
-                        $('#register').modal('hide');
-                        alert("You successful register on sait!");
+                        document.getElementById("info-message").innerHTML = "You successful register on sait!";
                     }
                     else {
-                        alert("Try again!");
+                        document.getElementById("info-message").innerHTML = "Try again!";
                     }
                 }
             }
             xhr.send(data);
         };
 
-        function OpenData1(id) {
+       epamLab.OpenData1=function(id) {
             var x = document.getElementById(id);
-            //var htm = createHtml(10);
             var xhr = new XMLHttpRequest();
             var url = '/BusinessLogic/JsonHandler.ashx';
             xhr.open("GET", url, false);
@@ -228,104 +178,46 @@
                     x.innerHTML = xhr.responseText;
                 }
                 else {
-                    alert("Try again!");
+                    alert("Server error! Try again!");
                 }
             }
             xhr.send(null);
         };
 
-        function OpenData2(id) {
+        epamLab.OpenData2=function(id) {
             var x = document.getElementById(id);
-            //var htm = createHtml(10);
             var xhr = new XMLHttpRequest();
             var url = '/BusinessLogic/JsonAsyncHandler.axd';
             xhr.open("GET", url, false);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4 && xhr.status == 200) {
-                    var json=JSON.parse(xhr.responseText);
-                    x.innerHTML = JsonTree(json);
+                    var json = JSON.parse(xhr.responseText);
+                    x.innerHTML = epamLab.JsonTree(json);
                 }
                 else {
-                    alert("Try again!");
+                    alert("Server error! Try again!");
                 }
             }
             xhr.send(null);
         };
 
-        function JsonTree(object){
-            var json="<ul>";
-            for(prop in object){
+        epamLab.JsonTree=function(object) {
+            var json = "<ul>";
+            for (prop in object) {
                 var value = object[prop];
-                switch (typeof(value)){
+                switch (typeof (value)) {
                     case "object":
-                        if (value == null) { json += "<li>" + prop + ": empty </li>"; break; }
+                        if (value == null)  break;
                         var token = Math.random().toString().substr(2);
-                        json += "<li style='list-style-type:circle;'><a href='#" + token + "' data-toggle='collapse'>" + prop + "</a><div id='" + token + "' class='collapse'>" + JsonTree(value) + "</div></li>";
+                        json += "<li style='list-style-type:circle;'><a href='#" + token + "' data-toggle='collapse'>" + prop + "</a><div id='" + token + "' class='collapse'>" + epamLab.JsonTree(value) + "</div></li>";
                         break;
                     default:
                         json += "<li>" + prop + ":" + value + "</li>";
-                      
                 }
             }
             return json + "</ul>";
         };
-        //function ParseJson(obj)
-        //{
-        //    var x = document.getElementById("data");
-        //    if (typeof obj == "object") {
-        //        for (var key in obj) {
-        //            x.innerHTML += key+" ";
-        //            ParseJson(obj[key]);
-        //        }
-        //    } else {
-        //        x.innerHTML += obj + " ";
-        //    }
-            //if (obj instanceof Array) {
-            //    for (var i = 0; i < obj.length; i++) {
-            //        if (typeof obj[i] == "object" && obj[i]) {
-            //            ParseJson(obj[i]);
-            //        } else {
-            //            x.innerHTML += i +" "+ obj[i]+" ";
-            //        }
-            //    }
-            //} else {
-            //    for (var prop in obj) {
-            //        if (typeof obj[prop] == "object" && obj[prop]) {
-            //            ParseJson(obj[prop]);
-            //        } else {
-            //            x.innerHTML+=prop+" "+obj[prop]+" ";
-            //        }
-            //    }
-            //}
-      
-        //function createHtml(j)
-        //{
-        //    var items = [];
-        //    var templateitm = "<li>" + "option" + "</li>";
-        //    for(i=0; i<j; i++)
-        //    {
-        //        items.push(templateitm);
-        //    }
-        //    return items.join('');
-        //}
-        //$('#regist').submit(function () {
-        //    var strUserName = $("#email").val();
-        //    var strPassword = $("#password").val();
-        //    $.ajax({
-        //        url: "/RegisterHandler.ashx",
-        //        type: "post",
-        //        data: {
-        //            email: strUserName,
-        //            password: strPassword
-        //        },
-        //        success: function (result) {
-        //            if (result == "success") {
-        //                $("#btnlogin").val("Log Off");
-        //            }
-        //        }
-        //    })
-        //});
-    </script>
 
+    </script>
 </body>
 </html>
